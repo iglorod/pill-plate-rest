@@ -1,0 +1,6 @@
+{
+    "env": {
+        "MONGO_PSW": "igLa",
+        "JWT_KEY": "labma"
+    }
+}
