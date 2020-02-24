@@ -1,9 +1,14 @@
 const mongoose = require('mongoose');
-const fs = require('fs');
+const aws = require('aws-sdk');
 
 const Topic = require('../models/topic');
 const User = require('../models/user');
 const Message = require('../models/message');
+
+const s3 = new aws.S3({
+    accessKeyId: process.env.AWS_ID,
+    secretAccessKey: process.env.AWS_KEY,
+})
 
 exports.postTopic = (req, res, next) => {
     const currDate = Math.floor((new Date().getTime() / 1000));
@@ -102,7 +107,16 @@ const deleteMessage = (message) => {
         .exec()
         .then(result => {
             if (message.type !== 'text' && message.type !== 'link') {
-                fs.unlink(message.path, err => console.log(err));
+                var params = {
+                    Bucket: 'pill-plate/' + getFileName(message.path, 2),
+                    Key: getFileName(message.path, 1),
+                };
+
+                s3.deleteObject(params, function (err) {
+                    if (err) {
+                        console.log(err);
+                    }
+                });
             }
         })
 }

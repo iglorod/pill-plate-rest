@@ -1,7 +1,17 @@
 const mongoose = require('mongoose');
-const fs = require('fs');
+const aws = require('aws-sdk');
 
 const Message = require('../models/message');
+
+const s3 = new aws.S3({ 
+    accessKeyId: process.env.AWS_ID,
+    secretAccessKey: process.env.AWS_KEY,
+})
+
+const getFileName = (path, position) => {
+    const pathContains = path.split('/');
+    return pathContains[pathContains.length - position];
+}
 
 exports.getMessages = (req, res, next) => {
     const idTopic = req.params.idTopic;
@@ -88,7 +98,7 @@ exports.postFileData = (req, res, next) => {
         creatorId: req.body.creatorId,
         type: req.body.type,
         date: req.body.date,
-        path: req.file.path,
+        path: req.file.location,
         wasReadedBy: [req.body.creatorId]
     })
 
@@ -171,8 +181,18 @@ exports.removeMessage = (req, res, next) => {
         .select('_id topicId creatorId type date text path class wasReadedBy comments')
         .exec()
         .then(message => {
-            if (message.type !== 'text' && message.type !== 'link')
-                fs.unlink(message.path, err => console.log(err));
+            if (message.type !== 'text' && message.type !== 'link') {
+                var params = {
+                    Bucket: 'pill-plate/' + getFileName(message.path, 2),
+                    Key: getFileName(message.path, 1),
+                };
+
+                s3.deleteObject(params, function (err) {
+                    if (err) {
+                        console.log(err);
+                    }
+                });
+            }
 
             res.status(200).json(message);
         })

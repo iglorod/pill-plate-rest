@@ -29,7 +29,6 @@ mongoose.connect('mongodb+srv://igLa:' + process.env.MONGO_PSW + '@cluster0-3h3y
     });
 
 app.use(morgan('dev'));
-app.use('/uploads', express.static('uploads'));
 
 app.use(helmet());
 

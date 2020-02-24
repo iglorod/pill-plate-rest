@@ -1,6 +1,8 @@
 {
     "env": {
-        "MONGO_PSW": "igLa",
-        "JWT_KEY": "labma"
+        "MONGO_PSW": "*",
+        "JWT_KEY": "*",
+        "AWS_ID": "*",
+        "AWS_KEY": "*"
     }
 }
